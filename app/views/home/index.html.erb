@@ -1,0 +1,10 @@
+<h1>家計簿アプリへようこそ！</h1>
+
+<% if user_signed_in? %>
+  <p>こんにちは、<%= current_user.email %> さん</p>
+  <%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete } %>
+<% else %>
+  <p>ログインしていません</p>
+  <%= link_to '新規登録 (Sign up)', new_user_registration_path %> |
+  <%= link_to 'ログイン (Log in)', new_user_session_path %>
+<% end %>
