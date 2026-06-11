@@ -12,17 +12,23 @@ class ExpensesController < ApplicationController
     start_date = Date.parse("#{@selected_month}-01")
     end_date = start_date.end_of_month
 
-    # 3. 指定された期間内の出費データだけを、ログインユーザーから取得
+    # 3. 指定された期間内の出費データだけを、ログインユーザーから取得（一覧表示用：並び替えあり）
     @expenses = current_user.expenses
                             .where(recorded_at: start_date..end_date)
                             .order(recorded_at: :desc)
 
-    rate_table = {"USD"=>@rates[:usd],
-                  "JPY"=>1,
-                  "GBP"=>@rates[:gbp],
-                  "EUR"=>@rates[:eur]
-                }
-    @totals_by_currency = @expenses.group(:currency_id).sum(:amount)
+    # 為替レートのハッシュテーブル
+    rate_table = {
+      "USD" => @rates[:usd],
+      "JPY" => 1,
+      "GBP" => @rates[:gbp],
+      "EUR" => @rates[:eur]
+    }
+
+    # 【修正箇所】PostgreSQL対策：.order による並び替え情報を一旦リセットしてから集計（group）します
+    @totals_by_currency = @expenses.unscope(:order).group(:currency_id).sum(:amount)
+
+    # 総合計（円換算）の計算
     @total_jpy = 0
     @totals_by_currency.each do |currency_id, amount|
       currency_code = Currency.find(currency_id).code
