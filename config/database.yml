@@ -22,4 +22,6 @@ test:
 
 production:
   <<: *default
-  database: db/production.sqlite3
+  adapter: postgresql
+  # Renderの設定画面から注入する「DATABASE_URL」という環境変数を読み込む設定です
+  url: <%= ENV['DATABASE_URL'] %>

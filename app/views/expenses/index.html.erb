@@ -81,5 +81,42 @@
         </li>
       <% end %>
     <% end %>
-  </ul>
+
+    <li style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #333333; display: flex; justify-content: space-between; color: #e74c3c;">
+    <%= "Total in JPY: ¥#{number_with_delimiter(sprintf("%.2f", @total_jpy))}" %>
+    </li>
+</ul>
+</div>
+
+<div style="
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  font-size: 0.9em;
+  color: #333333;
+  min-width: 160px;
+  z-index: 1000;
+">
+  <h4 style="margin-top: 0; margin-bottom: 8px; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; font-size: 0.95em; color: #666;">
+    現在の為替レート (対円)
+  </h4>
+  <table style="width: 100%; border-collapse: collapse; font-weight: bold; font-size: 1.05em;">
+    <tr style="height: 24px;">
+      <td style="color: #7f8c8d;">1 USD (ドル):</td>
+      <td style="text-align: right; color: #e74c3c;">¥<%= @rates[:usd] %></td>
+    </tr>
+    <tr style="height: 24px;">
+      <td style="color: #7f8c8d;">1 EUR (ユーロ):</td>
+      <td style="text-align: right; color: #2980b9;">¥<%= @rates[:eur] %></td>
+    </tr>
+    <tr style="height: 24px;">
+      <td style="color: #7f8c8d;">1 GBP (ポンド):</td>
+      <td style="text-align: right; color: #27ae60;">¥<%= @rates[:gbp] %></td>
+    </tr>
+  </table>
 </div>

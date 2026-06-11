@@ -1,6 +1,7 @@
 class ExpensesController < ApplicationController
   # ログインしていないユーザーは強制的にログイン画面へリダイレクトする
   before_action :authenticate_user!
+  before_action :set_exchange_rates
 
   # list of spendings
   def index
@@ -16,7 +17,17 @@ class ExpensesController < ApplicationController
                             .where(recorded_at: start_date..end_date)
                             .order(recorded_at: :desc)
 
+    rate_table = {"USD"=>@rates[:usd],
+                  "JPY"=>1,
+                  "GBP"=>@rates[:gbp],
+                  "EUR"=>@rates[:eur]
+                }
     @totals_by_currency = @expenses.group(:currency_id).sum(:amount)
+    @total_jpy = 0
+    @totals_by_currency.each do |currency_id, amount|
+      currency_code = Currency.find(currency_id).code
+      @total_jpy += rate_table[currency_code] * amount
+    end
   end
 
   # 出費入力画面
@@ -41,5 +52,29 @@ class ExpensesController < ApplicationController
   # 画面から送られてきたデータのうち、許可するカラムを指定（セキュリティ対策）
   def expense_params
     params.require(:expense).permit(:amount, :description, :recorded_at, :currency_id)
+  end
+
+  def set_exchange_rates
+    require 'open-uri'
+    require 'json'
+
+    usd_json = JSON.parse(URI.open("https://api.frankfurter.app/latest?from=USD&to=JPY").read)
+    usd_jpy = usd_json["rates"]["JPY"]
+
+    gbp_json = JSON.parse(URI.open("https://api.frankfurter.app/latest?from=GBP&to=JPY").read)
+    gbp_jpy = gbp_json["rates"]["JPY"]
+
+    eur_json = JSON.parse(URI.open("https://api.frankfurter.app/latest?from=EUR&to=JPY").read)
+    eur_jpy = eur_json["rates"]["JPY"]
+    # 各通貨の対USDレートをハッシュとしてまとめて保持する
+    @rates = {
+      usd: usd_jpy,
+      gbp: gbp_jpy,
+      eur: eur_jpy
+    }
+  rescue => e
+    logger.error "為替レートの取得に失敗しました: #{e.message}"
+    # APIが落ちていた場合の保険（固定レート）
+    @rates = { usd: 155.0, eur: 166.0, gbp: 195.0 }
   end
 end
