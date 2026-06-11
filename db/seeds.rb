@@ -8,3 +8,4 @@ Currency.create!(code: 'EUR', symbol: '€')
 Currency.create!(code: 'GBP', symbol: '£')
 
 puts "通貨データの作成が完了しました！ (JPY, USD, EUR, GBP)"
+

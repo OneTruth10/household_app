@@ -1,8 +1,9 @@
 Rails.application.routes.draw do
-  root 'home#index'
   devise_for :users
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  
+  # 出費に関する標準的なURL（index, new, createなど）をまとめて有効化
+  resources :expenses, only: [:index, :new, :create]
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  # アプリのトップページを、ログイン後は出費一覧画面（expenses#index）に設定
+  root 'expenses#index'
 end
