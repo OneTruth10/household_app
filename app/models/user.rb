@@ -5,4 +5,5 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_many :expenses, dependent: :destroy
+  belongs_to :main_currency, class_name: "Currency", foreign_key: "main_currency_id"
 end

@@ -8,6 +8,7 @@ class ExpensesController < ApplicationController
   def index
     # Select month from params or use default current month
     @selected_month = params[:month].presence || Time.zone.today.strftime("%Y-%m")
+    @main_currency = current_user.main_currency || Currency.first
 
     # 2. Take start date as the first date of the month then end date of month
     start_date = Date.parse("#{@selected_month}-01")
@@ -17,7 +18,7 @@ class ExpensesController < ApplicationController
     @expenses = current_user.expenses
                             .where(recorded_at: start_date..end_date)
                             .order(recorded_at: :desc)
-
+    # Conversion table
     rate_table = {
       "USD" => @rates[:usd],
       "JPY" => 1,
@@ -28,10 +29,14 @@ class ExpensesController < ApplicationController
     # Need to explicitly mention onder of date is not considered
     @totals_by_currency = @expenses.unscope(:order).group(:currency_id).sum(:amount)
 
-    @total_jpy = 0
+    main_to_jpy = rate_table[@main_currency.code]
+
+    @total_in_main = 0
+    total_in_jpy = 0
     @totals_by_currency.each do |currency_id, amount|
       currency_code = Currency.find(currency_id).code
-      @total_jpy += rate_table[currency_code] * amount
+      total_in_jpy += rate_table[currency_code] * amount
+      @total_in_main = total_in_jpy / main_to_jpy
     end
   end
 
@@ -68,6 +73,13 @@ class ExpensesController < ApplicationController
     end
   end
 
+  def update_currency
+    if current_user.update_columns(main_currency_id: params[:main_currency_id])
+      redirect_to expenses_path, notice: "Succusfully updated main currency to #{current_user.main_currency.code}!"
+    else
+      redirect_to expenses_path, alert: "Failed to update main currency"
+    end
+  end
 
   private
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_06_04_193705) do
+ActiveRecord::Schema[7.0].define(version: 2026_06_12_211408) do
   create_table "currencies", force: :cascade do |t|
     t.string "code"
     t.string "symbol"
@@ -38,6 +38,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_04_193705) do
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "main_currency_id", default: 1
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
