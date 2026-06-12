@@ -1,4 +1,17 @@
 <h2>出費一覧</h2>
+<% if flash[:notice] %>
+  <div style="
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-weight: bold;
+  ">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
 
 <% 
   # 表示中の月から、前月と次月の文字列（"2026-05" など）を計算
@@ -32,13 +45,16 @@
     </tr>
   </thead>
   <tbody>
-    <% @expenses.each do |expense| %>
+     <% @expenses.each do |expense| %>
       <tr>
-        <td style="padding: 8px;"><%= expense.recorded_at %></td>
-        <td style="padding: 8px;">
-          <%= expense.currency.symbol %><%= number_with_delimiter(expense.amount) %>
+        <td><%= expense.recorded_at %></td>
+        <td><%= expense.currency.code %> <%= expense.amount %></td>
+        <td><%= expense.description %></td>
+        <td>
+          <%= link_to "編集", edit_expense_path(expense), class: "btn-edit" %>
+          
+          <%= link_to "削除", expense_path(expense), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn-delete" %>
         </td>
-        <td style="padding: 8px;"><%= expense.description %></td>
       </tr>
     <% end %>
   </tbody>

@@ -1,0 +1,41 @@
+<div class="container">
+  <h2>出費の編集</h2>
+
+  <%= form_with(model: @expense, local: true) do |form| %>
+    <% if @expense.errors.any? %>
+      <div class="error-messages">
+        <h4><%= @expense.errors.count %>件のエラーがあります:</h4>
+        <ul>
+          <% @expense.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= form.label :amount, "金額" %>
+      <%= form.number_field :amount, step: "0.01", required: true %>
+    </div>
+
+    <div class="field">
+      <%= form.label :currency_id, "通貨" %>
+      <%= form.collection_select :currency_id, Currency.all, :id, :code, {}, { required: true } %>
+    </div>
+
+    <div class="field">
+      <%= form.label :recorded_at, "日付" %>
+      <%= form.date_field :recorded_at, required: true %>
+    </div>
+
+    <div class="field">
+      <%= form.label :description, "メモ" %>
+      <%= form.text_area :description %>
+    </div>
+
+    <div class="actions">
+      <%= form.submit "更新する", class: "btn-update" %>
+      <%= link_to "キャンセル", expenses_path, class: "btn-cancel" %>
+    </div>
+  <% end %>
+</div>

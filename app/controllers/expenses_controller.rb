@@ -2,6 +2,7 @@ class ExpensesController < ApplicationController
   # ログインしていないユーザーは強制的にログイン画面へリダイレクトする
   before_action :authenticate_user!
   before_action :set_exchange_rates
+  before_action :set_expense, only: [:edit, :destroy, :update]
 
   # list of spendings
   def index
@@ -17,7 +18,6 @@ class ExpensesController < ApplicationController
                             .where(recorded_at: start_date..end_date)
                             .order(recorded_at: :desc)
 
-    # 為替レートのハッシュテーブル
     rate_table = {
       "USD" => @rates[:usd],
       "JPY" => 1,
@@ -25,10 +25,9 @@ class ExpensesController < ApplicationController
       "EUR" => @rates[:eur]
     }
 
-    # 【修正箇所】PostgreSQL対策：.order による並び替え情報を一旦リセットしてから集計（group）します
+    # Need to explicitly mention onder of date is not considered
     @totals_by_currency = @expenses.unscope(:order).group(:currency_id).sum(:amount)
 
-    # 総合計（円換算）の計算
     @total_jpy = 0
     @totals_by_currency.each do |currency_id, amount|
       currency_code = Currency.find(currency_id).code
@@ -53,11 +52,32 @@ class ExpensesController < ApplicationController
     end
   end
 
+  def edit
+  end
+
+  def destroy
+    @expense.destroy
+    redirect_to expenses_path, notice: "Deleted expense", status: :see_other
+  end
+
+  def update
+    if @expense.update(expense_params)
+      redirect_to expenses_path, notice: "Successfully updated!"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+
   private
 
   # 画面から送られてきたデータのうち、許可するカラムを指定（セキュリティ対策）
   def expense_params
     params.require(:expense).permit(:amount, :description, :recorded_at, :currency_id)
+  end
+
+  def set_expense
+    @expense = current_user.expenses.find(params[:id])
   end
 
   def set_exchange_rates
