@@ -39,9 +39,6 @@
 
 <hr>
 
-<hr>
-
-
 <%= link_to '＋ 新しい出費を記録する', new_expense_path, style: "font-weight: bold; font-size: 1.2em;" %>
 
 <br><br>
@@ -52,17 +49,17 @@
       <th style="padding: 8px;">日付</th>
       <th style="padding: 8px;">金額</th>
       <th style="padding: 8px;">内容 (メモ)</th>
+      <th style="padding: 8px;">操作</th>
     </tr>
   </thead>
   <tbody>
      <% @expenses.each do |expense| %>
       <tr>
-        <td><%= expense.recorded_at %></td>
-        <td><%= expense.currency.code %> <%= expense.amount %></td>
-        <td><%= expense.description %></td>
-        <td>
+        <td style="padding: 8px;"><%= expense.recorded_at %></td>
+        <td style="padding: 8px;"><%= expense.currency.code %> <%= expense.amount %></td>
+        <td style="padding: 8px;"><%= expense.description %></td>
+        <td style="padding: 8px;">
           <%= link_to "編集", edit_expense_path(expense), class: "btn-edit" %>
-          
           <%= link_to "削除", expense_path(expense), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn-delete" %>
         </td>
       </tr>
@@ -73,103 +70,121 @@
 <% if @expenses.empty? %>
   <p>まだ出費の記録はありません。</p>
 <% end %>
-<details style="
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #ffffff;
-  border: 2px solid #333333;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  max-width: 250px;
-  min-width: 180px;
-  z-index: 1000;
-  cursor: pointer;
-">
-  <summary style="
-    padding: 10px 15px;
-    font-weight: bold;
-    font-size: 0.95em;
-    color: #555;
-    list-style: none; /* デフォルトの矢印を消す（Chrome/Safari） */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  ">
-    <span>📊 <%= Date.parse("#{@selected_month}-01").strftime("%m月") %>の合計出費</span>
-    <span style="font-size: 0.8em; color: #888;">▼ 開く/閉じる</span>
-  </summary>
 
-  <div style="padding: 0 15px 15px 15px; cursor: default;" onclick="event.stopPropagation();">
-    <ul style="list-style: none; padding: 0; margin: 0; font-size: 1.2em; font-weight: bold;">
-      <% if @totals_by_currency.empty? %>
-        <li style="color: #999; font-size: 0.9em; font-weight: normal;">記録がありません</li>
-      <% else %>
-        <% @totals_by_currency.each do |currency_id, total_amount| %>
-          <% currency = Currency.find(currency_id) %>
-          <li style="margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 0.9em;">
-            <span style="color: #7f8c8d;"><%= currency.code %>:</span>
-            <span style="color: #2c3e50;"><%= currency.symbol %><%= number_with_delimiter(total_amount) %></span>
-          </li>
+<div style="margin-bottom: 100px;"></div>
+
+<footer style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #f8f9fa;
+  border-top: 2px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+  z-index: 2000;
+">
+
+  <details style="position: relative;">
+    <summary style="
+      list-style: none;
+      font-weight: bold;
+      font-size: 0.9em;
+      color: #495057;
+      cursor: pointer;
+      background: #ffffff;
+      border: 1px solid #ced4da;
+      padding: 6px 12px;
+      border-radius: 4px;
+      user-select: none;
+    ">
+      💱 為替レート ▼
+    </summary>
+    
+    <div style="
+      position: absolute;
+      bottom: 45px;
+      left: 0;
+      background: #ffffff;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      padding: 12px;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+      min-width: 160px;
+      cursor: default;
+    " onclick="event.stopPropagation();">
+      <table style="width: 100%; border-collapse: collapse; font-weight: bold; font-size: 1em;">
+        <tr style="height: 24px;">
+          <td style="color: #7f8c8d; font-weight: normal;">1 USD:</td>
+          <td style="text-align: right; color: #e74c3c;">¥<%= @rates[:usd] %></td>
+        </tr>
+        <tr style="height: 24px;">
+          <td style="color: #7f8c8d; font-weight: normal;">1 EUR:</td>
+          <td style="text-align: right; color: #2980b9;">¥<%= @rates[:eur] %></td>
+        </tr>
+        <tr style="height: 24px;">
+          <td style="color: #7f8c8d; font-weight: normal;">1 GBP:</td>
+          <td style="text-align: right; color: #27ae60;">¥<%= @rates[:gbp] %></td>
+        </tr>
+      </table>
+    </div>
+  </details>
+
+  <div style="font-size: 0.85em; color: #6c757d; font-weight: bold;">
+    Base: <%= @main_currency.code %> (<%= @main_currency.symbol %>)
+  </div>
+
+  <details style="position: relative;">
+    <summary style="
+      list-style: none;
+      font-weight: bold;
+      font-size: 0.9em;
+      color: #495057;
+      cursor: pointer;
+      background: #ffffff;
+      border: 1px solid #ced4da;
+      padding: 6px 12px;
+      border-radius: 4px;
+      user-select: none;
+    ">
+      📊 <%= Date.parse("#{@selected_month}-01").strftime("%m月") %>の合計 ▼
+    </summary>
+    
+    <div style="
+      position: absolute;
+      bottom: 45px;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+      min-width: 200px;
+      cursor: default;
+    " onclick="event.stopPropagation();">
+      <ul style="list-style: none; padding: 0; margin: 0; font-weight: bold;">
+        <% if @totals_by_currency.empty? %>
+          <li style="color: #999; font-size: 0.9em; font-weight: normal;">記録がありません</li>
+        <% else %>
+          <% @totals_by_currency.each do |currency_id, total_amount| %>
+            <% currency = Currency.find(currency_id) %>
+            <li style="margin-bottom: 5px; display: flex; justify-content: space-between; font-size: 0.9em;">
+              <span style="color: #7f8c8d;"><%= currency.code %>:</span>
+              <span style="color: #2c3e50;"><%= currency.symbol %><%= number_with_delimiter(total_amount) %></span>
+            </li>
+          <% end %>
         <% end %>
-      <% end %>
 
-      <li style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #333333; display: flex; justify-content: space-between; color: #e74c3c; font-size: 0.95em;">
-        <span>Total in <%= @main_currency.code %>:</span>
-        <span><%= @main_currency.symbol %><%= number_with_delimiter(sprintf("%.2f", @total_in_main)) %></span>
-      </li>
-    </ul>
-  </div>
-</details>
+        <li style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #333333; display: flex; justify-content: space-between; color: #e74c3c; font-size: 1em;">
+          <span>Total:</span>
+          <span><%= @main_currency.symbol %><%= number_with_delimiter(sprintf("%.2f", @total_in_main)) %></span>
+        </li>
+      </ul>
+    </div>
+  </details>
 
-<details style="
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background-color: #f9f9f9;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  font-size: 0.9em;
-  color: #333333;
-  min-width: 160px;
-  z-index: 1000;
-  cursor: pointer;
-">
-  <summary style="
-    padding: 10px 15px;
-    font-weight: bold;
-    font-size: 0.95em;
-    color: #666;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  ">
-    <span>💱 現在の為替レート</span>
-    <span style="font-size: 0.8em; color: #888;">▼</span>
-  </summary>
-
-  <div style="padding: 0 15px 15px 15px; cursor: default;" onclick="event.stopPropagation();">
-    <table style="width: 100%; border-collapse: collapse; font-weight: bold; font-size: 1.05em;">
-      <tr style="height: 24px;">
-        <td style="color: #7f8c8d; font-weight: normal;">1 USD:</td>
-        <td style="text-align: right; color: #e74c3c;">¥<%= @rates[:usd] %></td>
-       Clyde </tr>
-      <tr style="height: 24px;">
-        <td style="color: #7f8c8d; font-weight: normal;">1 EUR:</td>
-        <td style="text-align: right; color: #2980b9;">¥<%= @rates[:eur] %></td>
-      </tr>
-      <tr style="height: 24px;">
-        <td style="color: #7f8c8d; font-weight: normal;">1 GBP:</td>
-        <td style="text-align: right; color: #27ae60;">¥<%= @rates[:gbp] %></td>
-      </tr>
-    </table>
-  </div>
-</details>
-
-<style>
-  summary::-webkit-details-marker {
-    display: none;
-  }
-</style>
+</footer>
