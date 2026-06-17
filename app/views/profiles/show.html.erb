@@ -1,0 +1,36 @@
+<div class="container" style="max-width: 600px; margin-top: 40px;">
+  
+  <% if flash[:notice] %>
+    <div style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; font-weight: bold;">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <div style="background: white; padding: 40px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    
+    <div style="margin-bottom: 20px;">
+      <% if @user.avatar.attached? %>
+        <%= image_tag @user.avatar, style: "width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #764ba2;" %>
+      <% else %>
+        <div style="width: 120px; height: 120px; border-radius: 50%; background: #edf2f7; display: inline-flex; align-items: center; justify-content: center; font-size: 3em; color: #a0aec0; border: 3px solid #e2e8f0;">
+          👤
+        </div>
+      <% end %>
+    </div>
+
+    <h2 style="margin: 0 0 5px 0; color: #2d3748;">
+      <%= @user.username.present? ? @user.username : "未設定のユーザー" %>
+    </h2>
+    <p style="margin: 0 0 20px 0; color: #718096; font-size: 0.9em;"><%= @user.email %></p>
+
+    <hr style="border: none; border-top: 1px solid #edf2f7; margin: 20px 0;">
+
+    <div style="text-align: left; margin-bottom: 30px;">
+      <h4 style="margin: 0 0 8px 0; color: #4a5568;">自己紹介</h4>
+      <div style="background: #f7fafc; padding: 15px; border-radius: 8px; min-height: 60px; color: #4a5568; white-space: pre-wrap;"><%= @user.bio.present? ? @user.bio : "自己紹介文はまだありません。" %></div>
+    </div>
+
+    <%= link_to 'プロフィールを編集する', edit_profile_path, style: "display: inline-block; background: #764ba2; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.95em;" %>
+  </div>
+
+</div>

@@ -50,7 +50,7 @@ gem "bootsnap", require: false
 
 # Added by myself
 gem 'devise'
-
+gem "aws-sdk-s3", require: false
 # Use Sass to process CSS
 # gem "sassc-rails"
 

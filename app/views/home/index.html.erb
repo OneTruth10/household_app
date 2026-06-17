@@ -1,10 +1,46 @@
-<h1>家計簿アプリへようこそ！</h1>
+<div class="container">
+  
+  <div class="hero-box">
+    <h1 style="margin: 0 0 15px 0; font-size: 2.5em;">Multi-Currency Expense Tracker</h1>
+    <p style="margin: 0; font-size: 1.2em; opacity: 0.9;">世界中どこで使っても、あなたの基準通貨で家計簿を一本化</p>
+  </div>
 
-<% if user_signed_in? %>
-  <p>こんにちは、<%= current_user.email %> さん</p>
-  <%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete } %>
-<% else %>
-  <p>ログインしていません</p>
-  <%= link_to '新規登録 (Sign up)', new_user_registration_path %> |
-  <%= link_to 'ログイン (Log in)', new_user_session_path %>
-<% end %>
+  <div style="margin-bottom: 40px; text-align: center;">
+    <a href="/expenses" class="expenses-card">
+      <span style="font-size: 3em; margin-bottom: 8px;">📊</span>
+      <span style="font-weight: bold; font-size: 1.6em; letter-spacing: 0.5px; margin-bottom: 4px;">Expenses</span>
+      <span style="font-size: 0.85em; color: #718096; font-weight: 500;">出費の記録・一覧を見る ↗</span>
+    </a>
+  </div>
+
+  <div style="margin-bottom: 40px;">
+    <h2 class="section-title">アプリについて</h2>
+    <p>このアプリは、海外旅行や留学、日常の他通貨での出費をシームレスに記録・管理できるスマートな家計簿システムです。USD（ドル）、EUR（ユーロ）、GBP（ポンド）など、異なる通貨で入力された出費を、最新のリアルタイム為替レートを用いてあなたの好みのメイン通貨（基準値）に自動で換算・集計します。</p>
+  </div>
+
+  <div>
+    <h2 class="section-title" style="margin-bottom: 20px;">現在の為替レート (対円)</h2>
+    <div class="flex-grid">
+      
+      <div class="rate-card">
+        <div style="font-size: 2em; margin-bottom: 5px;">🇺🇸</div>
+        <div style="color: #718096; font-weight: bold;">1 USD (アメリカ・ドル)</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #e53e3e; margin-top: 10px;">¥<%= @rates[:usd] %></div>
+      </div>
+
+      <div class="rate-card">
+        <div style="font-size: 2em; margin-bottom: 5px;">🇪🇺</div>
+        <div style="color: #718096; font-weight: bold;">1 EUR (ユーロ)</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #3182ce; margin-top: 10px;">¥<%= @rates[:eur] %></div>
+      </div>
+
+      <div class="rate-card">
+        <div style="font-size: 2em; margin-bottom: 5px;">🇬🇧</div>
+        <div style="color: #718096; font-weight: bold;">1 GBP (イギリス・ポンド)</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: #38a169; margin-top: 10px;">¥<%= @rates[:gbp] %></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

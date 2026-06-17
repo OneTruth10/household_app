@@ -1,122 +1,74 @@
-<h2>出費一覧</h2>
-<% if flash[:notice] %>
-  <div style="
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    font-weight: bold;
-  ">
-    <%= flash[:notice] %>
+<div class="container" style="margin-top: 20px;">
+  <h2>出費一覧</h2>
+  
+  <% if flash[:notice] %>
+    <div style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; font-weight: bold;">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <% 
+    current_date = Date.parse("#{@selected_month}-01")
+    prev_month = (current_date - 1.month).strftime("%Y-%m")
+    next_month = (current_date + 1.month).strftime("%Y-%m")
+  %>
+
+  <div style="margin: 20px 0; font-size: 1.2em; display: flex; gap: 20px; align-items: center;">
+    <%= link_to '◀ 前の月', expenses_path(month: prev_month), style: "text-decoration: none;" %>
+    <span style="font-weight: bold; font-size: 1.3em;"><%= current_date.strftime("%Y年 %m月") %></span>
+    <%= link_to '次の月 ▶', expenses_path(month: next_month), style: "text-decoration: none;" %>
   </div>
-<% end %>
 
-<% 
-  # 表示中の月から、前月と次月の文字列（"2026-05" など）を計算
-  current_date = Date.parse("#{@selected_month}-01")
-  prev_month = (current_date - 1.month).strftime("%Y-%m")
-  next_month = (current_date + 1.month).strftime("%Y-%m")
-%>
+  <div style="margin: 15px 0; background: #f5f5f5; padding: 10px; border-radius: 6px; display: inline-block;">
+    <%= form_with url: update_currency_expenses_path, method: :patch, local: true, style: "display: flex; gap: 10px; align-items: center;" do |f| %>
+      <%= f.label :main_currency_id, "メイン通貨（基準）:", style: "font-weight: bold;" %>
+      <%= f.collection_select :main_currency_id, Currency.all, :id, :code, { selected: current_user.main_currency_id } %>
+      <%= f.submit "変更", style: "cursor: pointer;" %>
+    <% end %>
+  </div>
 
-<div style="margin: 20px 0; font-size: 1.2em; display: flex; gap: 20px; align-items: center;">
-  <%= link_to '◀ 前の月', expenses_path(month: prev_month), style: "text-decoration: none;" %>
-  <span style="font-weight: bold; font-size: 1.3em;"><%= current_date.strftime("%Y年 %m月") %></span>
-  <%= link_to '次の月 ▶', expenses_path(month: next_month), style: "text-decoration: none;" %>
-</div>
+  <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
 
-<p>こんにちは、<%= current_user.email %> さん</p>
-<%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete } %>
+  <%= link_to '＋ 新しい出費を記録する', new_expense_path, style: "font-weight: bold; font-size: 1.2em;" %>
 
-<div style="margin: 15px 0; background: #f5f5f5; padding: 10px; border-radius: 6px; display: inline-block;">
-  <%= form_with url: update_currency_expenses_path, method: :patch, local: true, style: "display: flex; gap: 10px; align-items: center;" do |f| %>
-    <%= f.label :main_currency_id, "メイン通貨（基準）:", style: "font-weight: bold;" %>
-    <%= f.collection_select :main_currency_id, Currency.all, :id, :code, { selected: current_user.main_currency_id } %>
-    <%= f.submit "変更", style: "cursor: pointer;" %>
+  <br><br>
+
+  <table border="1" style="border-collapse: collapse; width: 100%; text-align: left; border-color: #e2e8f0;">
+    <thead>
+      <tr style="background-color: #f2f2f2;">
+        <th style="padding: 8px;">日付</th>
+        <th style="padding: 8px;">金額</th>
+        <th style="padding: 8px;">内容 (メモ)</th>
+        <th style="padding: 8px;">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+       <% @expenses.each do |expense| %>
+        <tr>
+          <td style="padding: 8px;"><%= expense.recorded_at %></td>
+          <td style="padding: 8px;"><%= expense.currency.code %> <%= expense.amount %></td>
+          <td style="padding: 8px;"><%= expense.description %></td>
+          <td style="padding: 8px;">
+            <%= link_to "編集", edit_expense_path(expense), class: "btn-edit" %>
+            <%= link_to "削除", expense_path(expense), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn-delete" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @expenses.empty? %>
+    <p>まだ出費の記録はありません。</p>
   <% end %>
 </div>
 
-<hr>
+<div class="footer-spacer"></div>
 
-<%= link_to '＋ 新しい出費を記録する', new_expense_path, style: "font-weight: bold; font-size: 1.2em;" %>
-
-<br><br>
-
-<table border="1" style="border-collapse: collapse; width: 100%; text-align: left;">
-  <thead>
-    <tr style="background-color: #f2f2f2;">
-      <th style="padding: 8px;">日付</th>
-      <th style="padding: 8px;">金額</th>
-      <th style="padding: 8px;">内容 (メモ)</th>
-      <th style="padding: 8px;">操作</th>
-    </tr>
-  </thead>
-  <tbody>
-     <% @expenses.each do |expense| %>
-      <tr>
-        <td style="padding: 8px;"><%= expense.recorded_at %></td>
-        <td style="padding: 8px;"><%= expense.currency.code %> <%= expense.amount %></td>
-        <td style="padding: 8px;"><%= expense.description %></td>
-        <td style="padding: 8px;">
-          <%= link_to "編集", edit_expense_path(expense), class: "btn-edit" %>
-          <%= link_to "削除", expense_path(expense), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn-delete" %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<% if @expenses.empty? %>
-  <p>まだ出費の記録はありません。</p>
-<% end %>
-
-<div style="margin-bottom: 100px;"></div>
-
-<footer style="
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 60px;
-  background-color: #f8f9fa;
-  border-top: 2px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  box-sizing: border-box;
-  z-index: 2000;
-">
+<footer class="global-footer">
 
   <details style="position: relative;">
-    <summary style="
-      list-style: none;
-      font-weight: bold;
-      font-size: 0.9em;
-      color: #495057;
-      cursor: pointer;
-      background: #ffffff;
-      border: 1px solid #ced4da;
-      padding: 6px 12px;
-      border-radius: 4px;
-      user-select: none;
-    ">
-      💱 為替レート ▼
-    </summary>
-    
-    <div style="
-      position: absolute;
-      bottom: 45px;
-      left: 0;
-      background: #ffffff;
-      border: 1px solid #ced4da;
-      border-radius: 6px;
-      padding: 12px;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-      min-width: 160px;
-      cursor: default;
-    " onclick="event.stopPropagation();">
+    <summary class="footer-btn-summary">💱 為替レート ▼</summary>
+    <div class="footer-popup-content left" onclick="event.stopPropagation();">
       <table style="width: 100%; border-collapse: collapse; font-weight: bold; font-size: 1em;">
         <tr style="height: 24px;">
           <td style="color: #7f8c8d; font-weight: normal;">1 USD:</td>
@@ -134,38 +86,13 @@
     </div>
   </details>
 
-  <div style="font-size: 0.85em; color: #6c757d; font-weight: bold;">
+  <div class="footer-base-currency">
     Base: <%= @main_currency.code %> (<%= @main_currency.symbol %>)
   </div>
 
   <details style="position: relative;">
-    <summary style="
-      list-style: none;
-      font-weight: bold;
-      font-size: 0.9em;
-      color: #495057;
-      cursor: pointer;
-      background: #ffffff;
-      border: 1px solid #ced4da;
-      padding: 6px 12px;
-      border-radius: 4px;
-      user-select: none;
-    ">
-      📊 <%= Date.parse("#{@selected_month}-01").strftime("%m月") %>の合計 ▼
-    </summary>
-    
-    <div style="
-      position: absolute;
-      bottom: 45px;
-      right: 0;
-      background: #ffffff;
-      border: 1px solid #ced4da;
-      border-radius: 6px;
-      padding: 15px;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
-      min-width: 200px;
-      cursor: default;
-    " onclick="event.stopPropagation();">
+    <summary class="footer-btn-summary">📊 <%= Date.parse("#{@selected_month}-01").strftime("%m月") %>の合計 ▼</summary>
+    <div class="footer-popup-content right" onclick="event.stopPropagation();">
       <ul style="list-style: none; padding: 0; margin: 0; font-weight: bold;">
         <% if @totals_by_currency.empty? %>
           <li style="color: #999; font-size: 0.9em; font-weight: normal;">記録がありません</li>
@@ -178,7 +105,6 @@
             </li>
           <% end %>
         <% end %>
-
         <li style="margin-top: 10px; padding-top: 10px; border-top: 2px dashed #333333; display: flex; justify-content: space-between; color: #e74c3c; font-size: 1em;">
           <span>Total:</span>
           <span><%= @main_currency.symbol %><%= number_with_delimiter(sprintf("%.2f", @total_in_main)) %></span>

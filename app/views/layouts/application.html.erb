@@ -1,16 +1,45 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>HouseholdApp</title>
+    <title>MultiCurrencyExpenseTracker</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
+
+    <header class="global-header">
+      <%= link_to root_path, class: "logo-link" do %>
+        <%= image_tag "logo.png", alt: "X-Tracker Logo", class: "logo-image" %>
+        <span class="logo-text">Cactus HouseHold</span>
+      <% end %>
+
+      <details style="position: relative;">
+        <summary class="dropdown-summary-header">
+          <% if user_signed_in? %>
+            👤 <%= current_user.email.split('@').first %> ▼
+          <% else %>
+            🔑 メニュー ▼
+          <% end %>
+        </summary>
+
+        <div class="dropdown-menu-header" onclick="event.stopPropagation();">
+          <% if user_signed_in? %>
+            <%= link_to '👤 プロフィール', profile_path, class: "dropdown-item bold" %>
+            <%= link_to '📊 出費一覧', expenses_path, class: "dropdown-item" %>
+            <hr style="border: none; border-top: 1px solid #edf2f7; margin: 4px 0;">
+            <%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete }, class: "dropdown-item danger" %>
+          <% else %>
+            <%= link_to 'ログイン', new_user_session_path, class: "dropdown-item" %>
+            <%= link_to '新規登録 (サインアップ)', new_user_registration_path, class: "dropdown-item" %>
+          <% end %>
+        </div>
+      </details>
+    </header>
+
     <%= yield %>
+
   </body>
 </html>
