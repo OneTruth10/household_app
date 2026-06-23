@@ -19,7 +19,7 @@ class User < ApplicationRecord
                                    dependent: :destroy
   has_many :followers, through: :passive_relationships, source: :follower
 
-  belongs_to :main_currency, class_name: "Currency", foreign_key: "main_currency_id"
+  belongs_to :main_currency, class_name: "Currency", foreign_key: "main_currency_id", optional: true
   after_initialize :set_default_main_currency
   validates :username, uniqueness: true, allow_blank: true
 
