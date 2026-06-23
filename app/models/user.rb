@@ -20,7 +20,7 @@ class User < ApplicationRecord
   has_many :followers, through: :passive_relationships, source: :follower
 
   belongs_to :main_currency, class_name: "Currency", foreign_key: "main_currency_id"
-
+  before_validation :set_default_main_currency
   validates :username, uniqueness: true, allow_blank: true
 
   def display_name
@@ -39,4 +39,9 @@ class User < ApplicationRecord
     followings.include?(other_user)
   end
 
+  def set_default_main_currency
+    if main_currency_id.blank?
+      self.main_currency = Currency.first
+    end
+  end
 end
