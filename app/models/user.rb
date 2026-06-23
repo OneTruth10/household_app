@@ -20,7 +20,7 @@ class User < ApplicationRecord
   has_many :followers, through: :passive_relationships, source: :follower
 
   belongs_to :main_currency, class_name: "Currency", foreign_key: "main_currency_id"
-  before_validation :set_default_main_currency
+  after_initialize :set_default_main_currency
   validates :username, uniqueness: true, allow_blank: true
 
   def display_name
@@ -40,8 +40,14 @@ class User < ApplicationRecord
   end
 
   def set_default_main_currency
-    if main_currency_id.blank?
-      self.main_currency = Currency.first
+    # main_currency_id がまだ空（nil）の場合だけ初期値をセットする
+    if self.main_currency_id.blank?
+      # 本番環境で万が一Currencyが空でも落ちないようにセーフティをかけます
+      default_currency = Currency.find_by(code: 'JPY') || Currency.first
+      
+      if default_currency
+        self.main_currency_id = default_currency.id
+      end
     end
   end
 end
