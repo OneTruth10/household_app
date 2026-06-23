@@ -1,0 +1,39 @@
+<div style="max-width: 600px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
+  <h2 style="color: #4a5568; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+    👥 フォロー中の友達
+  </h2>
+
+  <% if @users.any? %>
+    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 10px 20px;">
+      <% @users.each do |user| %>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #edf2f7;">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <% if user.avatar.attached? %>
+              <%= image_tag user.avatar, style: "width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #764ba2;" %>
+            <% else %>
+              <div style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #718096; font-size: 1.2em; font-weight: bold;">
+                <%= user.display_name.first.upcase %>
+              </div>
+            <% end %>
+            <div>
+              <div style="font-weight: bold; color: #2d3748;"><%= user.display_name %></div>
+              <div style="font-size: 0.85em; color: #718096;"><%= user.email %></div>
+            </div>
+          </div>
+
+          <div>
+            <%= button_to 'フォロー解除', relationship_path(current_user.active_relationships.find_by(followed_id: user.id)), 
+                          method: :delete, 
+                          data: { turbo: false },
+                          style: "background: #e5e7eb; color: #4b5563; padding: 6px 14px; border: none; border-radius: 20px; font-size: 0.85em; font-weight: bold; cursor: pointer;" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div style="text-align: center; color: #a0aec0; padding: 40px 0;">
+      <p style="font-size: 1.1em; margin-bottom: 10px;">まだ誰もフォローしていません</p>
+      <p style="font-size: 0.9em;">「友達を探す」からメールアドレスで検索してフォローしてみましょう！</p>
+    </div>
+  <% end %>
+</div>

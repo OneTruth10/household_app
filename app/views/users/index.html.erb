@@ -1,0 +1,60 @@
+<div class="container" style="max-width: 600px; margin-top: 40px;">
+  <div style="background: white; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    
+    <h2 style="margin-top: 0; margin-bottom: 20px; color: #2d3748;">ユーザー検索</h2>
+
+    <%= form_with url: users_path, method: :get, local: true, style: "display: flex; gap: 10px; margin-bottom: 30px;" do |f| %>
+      <%= f.text_field :q, value: params[:q], placeholder: "Search by email...", style: "flex: 1; padding: 10px; border: 1px solid #ced4da; border-radius: 6px;" %>
+      <%= f.submit "検索", style: "background: #764ba2; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" %>
+    <% end %>
+
+    <hr style="border: none; border-top: 1px solid #edf2f7; margin-bottom: 20px;">
+
+    <h3 style="color: #4a5568; font-size: 1.1em; margin-bottom: 15px;">検索結果</h3>
+    
+    <% if @users.any? %>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <% @users.each do |user| %>
+          <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #f7fafc;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <% if user.avatar.attached? %>
+                <%= image_tag user.avatar, style: "width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" %>
+              <% else %>
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #edf2f7; display: flex; align-items: center; justify-content: center; color: #a0aec0;">👤</div>
+              <% end %>
+              
+              <div>
+                <div style="font-weight: bold; color: #2d3748;"><%= user.display_name %></div>
+                <div style="font-size: 0.85em; color: #718096;"><%= user.email %></div>
+              </div>
+            </div>
+
+            <div>
+              <% unless current_user == user %>
+                <% if current_user.following?(user) %>
+                  <%# すでにフォローしている場合：解除ボタン %>
+                  <%= button_to 'フォロー解除', relationship_path(current_user.active_relationships.find_by(followed_id: user.id)), 
+                                method: :delete, 
+                                data: { turbo: false },
+                                style: "background: #e5e7eb; color: #4b5563; padding: 6px 14px; border: none; border-radius: 20px; font-size: 0.85em; font-weight: bold; cursor: pointer;" %>
+                <% else %>
+                  <%# まだフォローしていない場合：フォローボタン %>
+                  <%= button_to 'フォローする', relationships_path(followed_id: user.id), 
+                                method: :post, 
+                                data: { turbo: false },
+                                style: "background: #764ba2; color: white; padding: 6px 14px; border: none; border-radius: 20px; font-size: 0.85em; font-weight: bold; cursor: pointer;" %>
+                <% end %>
+              <% end %>
+            </div>
+
+          </li>
+        <% end %>
+      </ul>
+    <% elsif params[:q].present? %>
+      <p style="color: #718096; text-align: center; margin-top: 20px;">ユーザーが見つかりませんでした。</p>
+    <% else %>
+      <p style="color: #a0aec0; text-align: center; margin-top: 20px;">メールアドレスを入力して検索してください。</p>
+    <% end %>
+
+  </div>
+</div>

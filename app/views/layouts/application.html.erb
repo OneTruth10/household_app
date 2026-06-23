@@ -16,27 +16,39 @@
         <span class="logo-text">Cactus HouseHold</span>
       <% end %>
 
-      <details style="position: relative;">
-        <summary class="dropdown-summary-header">
-          <% if user_signed_in? %>
-            👤 <%= current_user.email.split('@').first %> ▼
-          <% else %>
-            🔑 メニュー ▼
+      <div style="display: flex; align-items: center; gap: 20px;">
+        
+        <% if user_signed_in? %>
+          <%= link_to users_path, style: "text-decoration: none; font-size: 1.1em; color: #4a5568; display: flex; align-items: center; gap: 5px;", title: "ユーザー検索" do %>
+            🔍 <span style="font-size: 0.8em; font-weight: bold; color: #718096;">友達を探す</span>
           <% end %>
-        </summary>
+        <% end %>
 
-        <div class="dropdown-menu-header" onclick="event.stopPropagation();">
-          <% if user_signed_in? %>
-            <%= link_to '👤 プロフィール', profile_path, class: "dropdown-item bold" %>
-            <%= link_to '📊 出費一覧', expenses_path, class: "dropdown-item" %>
-            <hr style="border: none; border-top: 1px solid #edf2f7; margin: 4px 0;">
-            <%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete }, class: "dropdown-item danger" %>
-          <% else %>
-            <%= link_to 'ログイン', new_user_session_path, class: "dropdown-item" %>
-            <%= link_to '新規登録 (サインアップ)', new_user_registration_path, class: "dropdown-item" %>
-          <% end %>
-        </div>
-      </details>
+        <details style="position: relative;">
+          <summary class="dropdown-summary-header">
+            <% if user_signed_in? %>
+              <%# ユーザー名が設定されていればそれを、なければメールのアカウント部分を表示 %>
+              👤 <%= current_user.username.present? ? current_user.username : current_user.email.split('@').first %> ▼
+            <% else %>
+              🔑 メニュー ▼
+            <% end %>
+          </summary>
+
+          <div class="dropdown-menu-header" onclick="event.stopPropagation();">
+            <% if user_signed_in? %>
+              <%= link_to '👤 プロフィール', profile_path, class: "dropdown-item bold" %>
+              <%= link_to '📊 出費一覧', expenses_path, class: "dropdown-item" %>
+              <%= link_to 'フォロー一覧', followings_users_path, class: "dropdown-item" %>
+              <hr style="border: none; border-top: 1px solid #edf2f7; margin: 4px 0;">
+              <%= link_to 'ログアウト', destroy_user_session_path, data: { turbo_method: :delete }, class: "dropdown-item danger" %>
+            <% else %>
+              <%= link_to 'ログイン', new_user_session_path, class: "dropdown-item" %>
+              <%= link_to '新規登録 (サインアップ)', new_user_registration_path, class: "dropdown-item" %>
+            <% end %>
+          </div>
+        </details>
+
+      </div>
     </header>
 
     <%= yield %>

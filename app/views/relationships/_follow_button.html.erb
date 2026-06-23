@@ -1,0 +1,12 @@
+<% unless current_user == user %>
+  <div class="follow-form">
+    <% if current_user.following?(user) %>
+      <%# フォロー解除ボタン %>
+      <%= f = current_user.active_relationships.find_by(followed_id: user.id) %>
+      <%= button_to "フォロー解除", relationship_path(f), method: :delete, class: "btn-unfollow", style: "background: #e2e8f0; color: #4a5568; padding: 6px 12px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer;" %>
+    <% else %>
+      <%# フォローするボタン %>
+      <%= button_to "フォローする", relationships_path(followed_id: user.id), method: :post, class: "btn-follow", style: "background: #764ba2; color: white; padding: 6px 12px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer;" %>
+    <% end %>
+  </div>
+<% end %>
