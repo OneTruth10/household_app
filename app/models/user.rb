@@ -6,6 +6,11 @@ class User < ApplicationRecord
 
   has_one_attached :avatar
   has_many :expenses, dependent: :destroy
+
+  #relationship for messaging
+  has_many :entries, dependent: :destroy
+  has_many :rooms, through: :entries
+  has_many :messages, dependent: :destroy
   
   #active relationship
   has_many :active_relationships, class_name: "Relationship",
@@ -49,5 +54,11 @@ class User < ApplicationRecord
         self.main_currency_id = default_currency.id
       end
     end
+  end
+
+  def mutual_following?(other_user)
+    is_followed = self.active_relationships.exists?(followed_id: other_user.id)
+    is_following = other_user.active_relationships.exists?(followed_id: self.id)
+    return is_following && is_followed
   end
 end

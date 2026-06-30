@@ -1,26 +1,69 @@
 <h2>Log in</h2>
 
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-  <div class="field">
+  <div class="field" style="margin-bottom: 15px;">
     <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+    <p><%= f.email_field :email, autofocus: true, autocomplete: "email", 
+                         style: "width: 50%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;" %></p>
   </div>
 
-  <div class="field">
+  <div class="field" style="margin-bottom: 20px;">
     <p><%= f.label :password %></p>
-    <p><%= f.password_field :password, autocomplete: "current-password" %></p>
+    
+    <div class="password-container" style="position: relative; width: 50%; box-sizing: border-box;">
+      <%= f.password_field :password, autocomplete: "current-password", class: "password-input", 
+                           style: "width: 100%; padding: 10px 40px 10px 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box;" %>
+      
+      <button type="button" class="password-toggle-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6c757d; padding: 0; line-height: 1;">
+        <span class="password-visible-icon">👁️</span>
+        <span class="password-hidden-icon" style="display: none;">🙈</span>
+      </button>
+    </div>
   </div>
 
   <% if devise_mapping.rememberable? %>
-    <div class="field">
+    <div class="field" style="margin-bottom: 15px;">
       <p><%= f.check_box :remember_me %></p>
       <p><%= f.label :remember_me %></p>
     </div>
   <% end %>
 
-  <div class="actions">
-    <%= f.submit "Log in" %>
+  <div class="actions" style="margin-top: 20px;">
+    <%= f.submit "Log in", style: "padding: 10px 20px; border-radius: 6px; border: 1px solid #764ba2; background: #764ba2; color: white; font-weight: bold; cursor: pointer;" %>
   </div>
 <% end %>
 
-<%= render "devise/shared/links" %>
+<div style="margin-top: 20px;">
+  <%= render "devise/shared/links" %>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => { attachToggleEvent(); });
+  document.addEventListener("turbo:load", () => { attachToggleEvent(); });
+
+  function attachToggleEvent() {
+    const containers = document.querySelectorAll(".password-container");
+    containers.forEach(container => {
+      const input = container.querySelector(".password-input");
+      const toggleBtn = container.querySelector(".password-toggle-btn");
+      const visibleIcon = container.querySelector(".password-visible-icon");
+      const hiddenIcon = container.querySelector(".password-hidden-icon");
+
+      if (toggleBtn && input && !toggleBtn.dataset.bound) {
+        toggleBtn.dataset.bound = "true";
+        toggleBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (input.type === 'password') {
+            input.type = 'text';
+            if (visibleIcon) visibleIcon.style.display = 'none';
+            if (hiddenIcon) hiddenIcon.style.display = 'inline-block';
+          } else {
+            input.type = 'password';
+            if (visibleIcon) visibleIcon.style.display = 'inline-block';
+            if (hiddenIcon) hiddenIcon.style.display = 'none';
+          }
+        });
+      }
+    });
+  }
+</script>

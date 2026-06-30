@@ -12,20 +12,32 @@
               <%= image_tag user.avatar, style: "width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #764ba2;" %>
             <% else %>
               <div style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #718096; font-size: 1.2em; font-weight: bold;">
-                <%= user.display_name.first.upcase %>
+                <% # 💡 名前が空（nil）でもエラーにならないように安全に最初の1文字を取得します %>
+                <%= (user.display_name.presence || "User")[0].upcase %>
               </div>
             <% end %>
             <div>
-              <div style="font-weight: bold; color: #2d3748;"><%= user.display_name %></div>
+              <div style="font-weight: bold; color: #2d3748;"><%= user.display_name.presence || "No Name" %></div>
               <div style="font-size: 0.85em; color: #718096;"><%= user.email %></div>
             </div>
           </div>
 
-          <div>
+          <% # 👇 右側のボタンエリア：flexを使って横並び（gap: 8px）に指定します %>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <% # 💡 フォロー解除ボタン %>
             <%= button_to 'フォロー解除', relationship_path(current_user.active_relationships.find_by(followed_id: user.id)), 
                           method: :delete, 
                           data: { turbo: false },
                           style: "background: #e5e7eb; color: #4b5563; padding: 6px 14px; border: none; border-radius: 20px; font-size: 0.85em; font-weight: bold; cursor: pointer;" %>
+            
+            <% if current_user.mutual_following?(user) %>
+              <%= button_to rooms_path(user_ids: [user.id]), 
+                method: :post, 
+                form: {data: { turbo: false }},
+                style: "background: #10b981; color: white; padding: 6px 14px; border: none; border-radius: 20px; font-size: 0.85em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);" do %>
+                💬 メッセージ
+              <% end %>
+            <% end %>
           </div>
         </div>
       <% end %>

@@ -1,0 +1,62 @@
+<div style="max-width: 600px; margin: 30px auto; padding: 0 20px; font-family: sans-serif;">
+  
+  <% # ─── ヘッダー部分（戻るリンク ＋ 部屋名） ─── %>
+  <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+    <%= link_to "← 一覧", rooms_path, style: "text-decoration: none; color: #764ba2; font-weight: bold;" %>
+    <h3 style="margin: 0; color: #2d3748; font-size: 1.25em;"><%= @room_name %></h3>
+  </div>
+
+  <% # ─── メッセージ表示エリア ─── %>
+  <div style="background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 12px; height: 450px; overflow-y: auto; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+    <% if @messages.any? %>
+      <% @messages.each do |msg| %>
+        <% is_mine = (msg.user_id == current_user.id) %>
+        
+        <div style="display: flex; flex-direction: column; align-items: <%= is_mine ? 'flex-end' : 'flex-start' %>;">
+          <% # グループチャットの際、誰の発言か分かるように名前を出す（自分以外） %>
+          <% if !is_mine %>
+            <span style="font-size: 0.75em; color: #718096; margin-left: 5px; margin-bottom: 2px;"><%= msg.user.display_name %></span>
+          <% end %>
+
+          <div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: <%= is_mine ? 'row-reverse' : 'row' %>; max-width: 75%;">
+            <% # 吹き出し本体 %>
+            <div style="padding: 10px 16px; border-radius: 18px; font-size: 0.95em; line-height: 1.4; word-break: break-all;
+                        background: <%= is_mine ? '#764ba2' : 'white' %>; 
+                        color: <%= is_mine ? 'white' : '#2d3748' %>;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                        border: <%= is_mine ? 'none' : '1px solid #e2e8f0' %>;">
+              <%= simple_format(msg.content, {}, wrapper_tag: "span") %>
+            </div>
+            <% # 送信時間 %>
+            <span style="font-size: 0.7em; color: #a0aec0; white-space: nowrap; margin-bottom: 2px;">
+              <%= msg.created_at.strftime("%H:%M") %>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div style="text-align: center; color: #a0aec0; margin: auto 0;">
+        最初のメッセージを送信してみましょう！
+      </div>
+    <% end %>
+  </div>
+
+  <% # ─── メッセージ送信フォーム ─── %>
+  <%= form_for [@room, @message], html: { style: "display: flex; gap: 10px; align-items: center;" } do |f| %>
+    <%= f.text_field :content, placeholder: "メッセージを入力...", required: true, autocomplete: "off",
+                     style: "flex-grow: 1; padding: 12px 16px; border: 1px solid #ced4da; border-radius: 25px; box-sizing: border-box; outline: none; font-size: 0.95em;" %>
+    
+    <%= f.submit "送信", style: "background: #764ba2; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 0.95em; box-shadow: 0 4px 6px rgba(118, 75, 162, 0.15);" %>
+  <% end %>
+
+</div>
+
+<script>
+  // 💡 トーク画面を開いたときに、自動で最下部（最新メッセージの位置）までスクロールさせるJS
+  document.addEventListener("turbo:load", () => {
+    const scrollArea = document.querySelector("div[style*='overflow-y: auto']");
+    if (scrollArea) {
+      scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+  });
+</script>

@@ -1,10 +1,7 @@
 Rails.application.routes.draw do
-  get 'users/index'
-  get 'relationships/create'
-  get 'relationships/destroy'
   devise_for :users
   root 'home#index'
-  resources :users, only: [:index] do 
+  resources :users, only: [:index, :show] do 
     collection do
       get :followings
     end
@@ -16,4 +13,7 @@ Rails.application.routes.draw do
     end
   end
   resources :relationships, only: [:create, :destroy]
+  resources :rooms, only: [:index, :show, :create] do
+    resources :messages, only: [:create]
+  end
 end

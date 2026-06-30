@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_06_17_230553) do
+ActiveRecord::Schema[7.0].define(version: 2026_06_30_160233) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -46,6 +46,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_17_230553) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "entries", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "room_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_entries_on_room_id"
+    t.index ["user_id"], name: "index_entries_on_user_id"
+  end
+
   create_table "expenses", force: :cascade do |t|
     t.decimal "amount", precision: 10, scale: 2
     t.string "description"
@@ -58,6 +67,16 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_17_230553) do
     t.index ["user_id"], name: "index_expenses_on_user_id"
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "room_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["room_id"], name: "index_messages_on_room_id"
+    t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
   create_table "relationships", force: :cascade do |t|
     t.integer "follower_id"
     t.integer "followed_id"
@@ -66,6 +85,12 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_17_230553) do
     t.index ["followed_id", "follower_id"], name: "index_relationships_on_followed_id_and_follower_id", unique: true
     t.index ["followed_id"], name: "index_relationships_on_followed_id"
     t.index ["follower_id"], name: "index_relationships_on_follower_id"
+  end
+
+  create_table "rooms", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "name"
   end
 
   create_table "users", force: :cascade do |t|
@@ -85,6 +110,10 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_17_230553) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "entries", "rooms"
+  add_foreign_key "entries", "users"
   add_foreign_key "expenses", "currencies"
   add_foreign_key "expenses", "users"
+  add_foreign_key "messages", "rooms"
+  add_foreign_key "messages", "users"
 end

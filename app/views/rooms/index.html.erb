@@ -1,0 +1,41 @@
+<div style="max-width: 600px; margin: 40px auto; padding: 20px; font-family: sans-serif;">
+  <h2 style="color: #4a5568; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+    💬 メッセージ一覧
+  </h2>
+
+  <% if @rooms.any? %>
+    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden;">
+      <% @rooms.each do |room| %>
+        <% # 💡 ルームごとに最新のメッセージを1件取得 %>
+        <% last_message = room.messages.order(created_at: :desc).first %>
+        <% # 💡 部屋の名前を特定（コントローラーと同じロジック） %>
+        <% room_name = room.name.presence || room.users.where.not(id: current_user.id).pluck(:display_name).join(", ") %>
+
+        <%= link_to room_path(room), style: "display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid #edf2f7; text-decoration: none; color: inherit; transition: background 0.2s;" do %>
+          <div style="display: flex; align-items: center; gap: 15px; width: 80%;">
+            <% # アイコン（簡易的にグループか個人かで色分け） %>
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: <%= room.name.present? ? '#764ba2' : '#e2e8f0' %>; display: flex; align-items: center; justify-content: center; color: <%= room.name.present? ? 'white' : '#718096' %>; font-weight: bold; font-size: 1.1em; flex-shrink: 0;">
+              <%= room_name[0].to_s.upcase %>
+            </div>
+            
+            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">
+              <div style="font-weight: bold; color: #2d3748; margin-bottom: 4px;"><%= room_name %></div>
+              <div style="font-size: 0.9em; color: #a0aec0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <%= last_message.present? ? last_message.content : "まだメッセージはありません" %>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 0.8em; color: #a0aec0; text-align: right;">
+            <%= last_message.present? ? last_message.created_at.strftime("%m/%d %H:%M") : "" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div style="text-align: center; color: #a0aec0; padding: 6px 0; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 40px 20px;">
+      <p style="font-size: 1.1em; margin-bottom: 10px;">メッセージのやり取りがありません</p>
+      <p style="font-size: 0.9em;">相互フォローの友達のプロフィールからメッセージを送ってみましょう！</p>
+    </div>
+  <% end %>
+</div>

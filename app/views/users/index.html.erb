@@ -25,7 +25,12 @@
               
               <div>
                 <div style="font-weight: bold; color: #2d3748;"><%= user.display_name %></div>
-                <div style="font-size: 0.85em; color: #718096;"><%= user.email %></div>
+                <div style="font-size: 0.85em;">
+                <%= link_to user.email, user_path(user), 
+                  style: "color: #764ba2; text-decoration: none; font-weight: 500;", 
+                  onmouseover: "this.style.textDecoration='underline'", 
+                  onmouseout: "this.style.textDecoration='none'" %>
+                </div>
               </div>
             </div>
 
