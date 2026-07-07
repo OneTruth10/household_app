@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_06_30_160233) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_07_224026) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -73,6 +73,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_30_160233) do
     t.text "content"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "expense_id"
+    t.index ["expense_id"], name: "index_messages_on_expense_id"
     t.index ["room_id"], name: "index_messages_on_room_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
@@ -114,6 +116,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_06_30_160233) do
   add_foreign_key "entries", "users"
   add_foreign_key "expenses", "currencies"
   add_foreign_key "expenses", "users"
+  add_foreign_key "messages", "expenses"
   add_foreign_key "messages", "rooms"
   add_foreign_key "messages", "users"
 end

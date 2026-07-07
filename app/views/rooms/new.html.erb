@@ -1,0 +1,61 @@
+<%= turbo_frame_tag "modal" do %>
+  <% # ─── 画面全体を覆う黒背景（オーバーレイ） ─── %>
+  <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease-out;">
+    
+    <% # ─── 中央に浮かぶポップアップ本体 ─── %>
+    <div style="background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.2s ease-out;">
+      
+      <% # ヘッダーエリア %>
+      <div style="padding: 20px; border-bottom: 1px solid #edf2f7; display: flex; align-items: center; justify-content: space-between;">
+        <h2 style="margin: 0; color: #4a5568; font-size: 1.25em;">👥 グループチャット作成</h2>
+        <% # 💡 閉じるボタン（中身が空の別フレームを指定することでモーダルを消去する） %>
+        <%= link_to "×", rooms_path, data: { turbo_frame: "_top" }, style: "text-decoration: none; color: #a0aec0; font-size: 1.5em; font-weight: bold; line-height: 1; padding: 5px;" %>
+      </div>
+
+      <% # フォーム本体（スクロール可能エリア） %>
+      <%= form_with url: rooms_path, method: :post, data: { turbo: false }, style: "display: flex; flex-direction: column; flex: 1; overflow: hidden;" do |f| %>
+        <div style="padding: 20px; overflow-y: auto; flex: 1;">
+          
+          <% # グループ名 %>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: bold; color: #4a5568; margin-bottom: 8px; font-size: 0.9em;">グループ名（任意）</label>
+            <%= f.text_field :name, placeholder: "例: 旅行メンバー", style: "width: 100%; padding: 10px; border: 1px solid #edf2f7; border-radius: 8px; box-sizing: border-box; outline: none; font-size: 0.95em; background: #f7fafc;" %>
+          </div>
+
+          <% # メンバー選択 %>
+          <label style="display: block; font-weight: bold; color: #4a5568; margin-bottom: 8px; font-size: 0.9em;">招待する友達</label>
+          <% if @friends.any? %>
+            <div style="border: 1px solid #edf2f7; border-radius: 8px; padding: 0 15px; background: #f7fafc;">
+              <% @friends.each do |friend| %>
+                <label style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #edf2f7; cursor: pointer; font-size: 0.95em;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 35px; height: 35px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #718096; font-weight: bold; font-size: 0.9em;">
+                      <%= (friend.display_name.presence || "U")[0].upcase %>
+                    </div>
+                    <span style="font-weight: bold; color: #2d3748;"><%= friend.display_name %></span>
+                  </div>
+                  <%= check_box_tag "user_ids[]", friend.id, false, style: "width: 18px; height: 18px; accent-color: #764ba2;" %>
+                </label>
+              <% end %>
+            </div>
+          <% else %>
+            <p style="color: #a0aec0; font-size: 0.9em; text-align: center; padding: 20px 0;">招待できる友達がいません。</p>
+          <% end %>
+        </div>
+
+        <% # フッターエリア（アクションボタン） %>
+        <div style="padding: 15px 20px; border-top: 1px solid #edf2f7; background: #f7fafc; display: flex; justify-content: flex-end; gap: 10px;">
+          <%= link_to "キャンセル", rooms_path, data: { turbo_frame: "_top" }, style: "text-decoration: none; background: #e5e7eb; color: #4b5563; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold;" %>
+          <%= f.submit "作成する", style: "background: #764ba2; color: white; border: none; padding: 8px 20px; border-radius: 20px; font-size: 0.9em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(118, 75, 162, 0.2);" if @friends.any? %>
+        </div>
+      <% end %>
+
+    </div>
+  </div>
+
+  <% # ─── アニメーション用CSS ─── %>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+<% end %>

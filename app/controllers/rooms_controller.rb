@@ -15,6 +15,11 @@ class RoomsController < ApplicationController
     end
   end
 
+  def new
+    @room = Room.new
+    @friends = User.all.select { |user| current_user.mutual_following?(user) }
+  end
+
   def create
     invited_user_ids = Array(params[:user_ids]).map(&:to_i).reject{|id| id == current_user.id}
 
