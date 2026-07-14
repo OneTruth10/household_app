@@ -1,3 +1,33 @@
+<% # app/views/rooms/show.html.erb %>
+
+<%= turbo_frame_tag "modal" do %>
+  <% if @message && @message.persisted? && action_name == 'edit' %>
+    <dialog open style="border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; max-width: 450px; z-index: 1000; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+      
+      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: -1;" onclick="this.closest('dialog').close()"></div>
+
+      <div style="padding: 24px; background: white;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h4 style="margin: 0; color: #2d3748; font-size: 1.1em;">メッセージを編集</h4>
+          <%= link_to "✕", room_path(@room), style: "text-decoration: none; color: #a0aec0; font-size: 1.2em; font-weight: bold;" %>
+        </div>
+
+        <%= form_for [@room, @message], url: room_message_path(@room, @message), method: :patch, html: { data: { turbo_frame: dom_id(@message) } } do |f| %>
+          <div style="margin-bottom: 16px;">
+            <%= f.text_area :content, style: "width: 100%; min-height: 100px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; outline: none; resize: vertical;" %>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <%= link_to "キャンセル", room_path(@room), style: "padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; color: #64748b; text-decoration: none; font-size: 0.9em; text-align: center;" %>
+            <%= f.submit "保存する", style: "padding: 10px 20px; background: #764ba2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9em;" %>
+          </div>
+        <% end %>
+      </div>
+
+    </dialog>
+  <% end %>
+<% end %>
+
 <div style="max-width: 600px; margin: 30px auto; padding: 0 20px; font-family: sans-serif;">
   
   <% # header %>
@@ -12,65 +42,80 @@
       <% @messages.each do |msg| %>
         <% is_mine = (msg.user_id == current_user.id) %>
         
-        <div style="display: flex; flex-direction: column; align-items: <%= is_mine ? 'flex-end' : 'flex-start' %>;">
-          <% # Names for oppnent users %>
-          <% if !is_mine %>
-            <span style="font-size: 0.75em; color: #718096; margin-left: 5px; margin-bottom: 2px;"><%= msg.user.display_name %></span>
-          <% end %>
-
-          <div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: <%= is_mine ? 'row-reverse' : 'row' %>; max-width: 80%;">
-            
-            <% # Message formot for sharing expense %>
-            <% if msg.expense_id.present? %>
-              <div style="padding: 15px; border-radius: 16px; font-size: 0.95em; line-height: 1.4; min-width: 220px;
-                          background: <%= is_mine ? '#e0f2fe' : 'white' %>; 
-                          color: #1e293b;
-                          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-                          border: 2px solid <%= is_mine ? '#7dd3fc' : '#e2e8f0' %>;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold; color: #0284c7;">
-                  🪙 出費を共有しました
-                </div>
-                <div style="font-weight: bold; font-size: 1.1em; color: #1e293b; margin-bottom: 4px;">
-                  <%= msg.expense.description %>
-                </div>
-                <% currency = Currency.find(msg.expense.currency_id) %>
-                <% expense_symbol = currency.symbol %>
-                <div style="font-size: 1.2em; font-weight: 800; color: #0f172a; margin-bottom: 10px;">
-                <% if currency.code=="jpy" %>
-                  <%= number_to_currency(msg.expense.amount, unit: expense_symbol, precision: 0) %>
-                <% else %>
-                  <%= number_to_currency(msg.expense.amount, unit: expense_symbol, precision: 2) %>
-                <% end %>
-                </div>
-                
-                <% if msg.content.present? %>
-                  <div style="font-size: 0.9em; color: #475569; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 8px; border-left: 3px solid #cbd5e1;">
-                    <%= simple_format(msg.content, {}, wrapper_tag: "span") %>
-                  </div>
-                <% end %>
-              </div>
-            <% else %>
-              <div style="padding: 10px 16px; border-radius: 18px; font-size: 0.95em; line-height: 1.4; word-break: break-all;
-                          background: <%= is_mine ? '#764ba2' : 'white' %>; 
-                          color: <%= is_mine ? 'white' : '#2d3748' %>;
-                          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-                          border: <%= is_mine ? 'none' : '1px solid #e2e8f0' %>;">
-                <%= simple_format(msg.content, {}, wrapper_tag: "span") %>
-              </div>
+        <% # 💡 メッセージごとに一意のIDの枠をつけます %>
+        <%= turbo_frame_tag dom_id(msg) do %>
+          <div style="display: flex; flex-direction: column; align-items: <%= is_mine ? 'flex-end' : 'flex-start' %>; margin-bottom: 10px;">
+            <% # Names for opponent users %>
+            <% if !is_mine %>
+              <span style="font-size: 0.75em; color: #718096; margin-left: 5px; margin-bottom: 2px;"><%= msg.user.display_name %></span>
             <% end %>
 
-            <% # sent time %>
-            <span style="font-size: 0.7em; color: #a0aec0; white-space: nowrap; margin-bottom: 2px;">
-              <%= msg.created_at.strftime("%H:%M") %>
-            </span>
+            <div style="display: flex; align-items: flex-end; gap: 8px; flex-direction: <%= is_mine ? 'row-reverse' : 'row' %>; max-width: 80%;">
+              
+              <% # Message format for sharing expense %>
+              <% if msg.expense_id.present? %>
+                <div style="padding: 15px; border-radius: 16px; font-size: 0.95em; line-height: 1.4; min-width: 220px; text-align: left;
+                            background: <%= is_mine ? '#e0f2fe' : 'white' %>; 
+                            color: #1e293b;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                            border: 2px solid <%= is_mine ? '#7dd3fc' : '#e2e8f0' %>;">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold; color: #0284c7;">
+                    🪙 出費を共有しました
+                  </div>
+                  <div style="font-weight: bold; font-size: 1.1em; color: #1e293b; margin-bottom: 4px;">
+                    <%= msg.expense.description %>
+                  </div>
+                  <% currency = Currency.find(msg.expense.currency_id) %>
+                  <% expense_symbol = currency.symbol %>
+                  <div style="font-size: 1.2em; font-weight: 800; color: #0f172a; margin-bottom: 10px;">
+                    <% if currency.code=="jpy" %>
+                      <%= number_to_currency(msg.expense.amount, unit: expense_symbol, precision: 0) %>
+                    <% else %>
+                      <%= number_to_currency(msg.expense.amount, unit: expense_symbol, precision: 2) %>
+                    <% end %>
+                  </div>
+                  
+                  <% if msg.content.present? %>
+                    <div style="font-size: 0.9em; color: #475569; background: rgba(0,0,0,0.03); padding: 8px; border-radius: 8px; border-left: 3px solid #cbd5e1;">
+                      <%= simple_format(msg.content, {}, wrapper_tag: "span") %>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div style="padding: 10px 16px; border-radius: 18px; font-size: 0.95em; line-height: 1.4; word-break: break-all; text-align: left;
+                            background: <%= is_mine ? '#764ba2' : 'white' %>; 
+                            color: <%= is_mine ? 'white' : '#2d3748' %>;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                            border: <%= is_mine ? 'none' : '1px solid #e2e8f0' %>;">
+                  <%= simple_format(msg.content, {}, wrapper_tag: "span") %>
+                </div>
+              <% end %>
+
+              <% # sent time %>
+              <span style="font-size: 0.7em; color: #a0aec0; white-space: nowrap; margin-bottom: 2px;">
+                <%= msg.created_at.strftime("%H:%M") %>
+              </span>
+              <% if is_mine %>
+                <div style="display: flex; gap: 5px; margin-top: 4px;">
+                  <%= link_to "編集", edit_room_message_path(@room, msg), 
+                              data: { turbo_frame: "modal" }, 
+                              style: "font-size: 0.75em; color: #764ba2; text-decoration: none;" %>
+                  <%= link_to "削除", room_message_path(@room, msg), 
+                              data: { turbo_method: :delete, turbo_confirm: "本当にこのメッセージを削除しますか？" }, 
+                              style: "font-size: 0.75em; color: #e53e3e; text-decoration: none;" %>
+                </div>
+              <% end %>
+            </div>
           </div>
-        </div>
+        <% end %>
+        
       <% end %>
     <% else %>
       <div style="text-align: center; color: #a0aec0; margin: auto 0;">
         最初のメッセージを送信してみましょう！
       </div>
     <% end %>
+    <%= turbo_frame_tag "modal" %>
   </div>
 
   <% # Message form %>
@@ -80,7 +125,7 @@
     <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #edf2f7;">
       <span style="font-size: 0.85em; color: #64748b; font-weight: bold; white-space: nowrap;">💰 出費を添付:</span>
       <%= f.select :expense_id, 
-                   current_user.expenses.order(created_at: :desc).map { |e| ["#{e.description} (£#{e.amount})", e.id] }, 
+                   current_user.expenses.order(created_at: :desc).map { |e| ["#{e.description} (#{e.currency.symbol}#{e.amount})", e.id] }, 
                    { include_blank: "選択しない（通常のメッセージ）" }, 
                    { style: "flex-grow: 1; border: none; background: transparent; outline: none; font-size: 0.85em; color: #334155; cursor: pointer;" } %>
     </div>

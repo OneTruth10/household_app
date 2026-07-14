@@ -1,0 +1,28 @@
+<% # app/views/messages/edit.html.erb %>
+
+<%= turbo_frame_tag "modal" do %>
+  <dialog open style="border: none; border-radius: 12px; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; max-width: 450px; z-index: 1000; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    
+    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: -1;" onclick="this.closest('dialog').close()"></div>
+
+    <div style="padding: 24px; background: white;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h4 style="margin: 0; color: #2d3748; font-size: 1.1em;">メッセージを編集</h4>
+        <%= link_to "✕", room_path(@room), style: "text-decoration: none; color: #a0aec0; font-size: 1.2em; font-weight: bold;" %>
+      </div>
+
+      <% # 💡 送信データに `data: { turbo_frame: dom_id(@message) }` を追加して、更新対象をターゲット指定します %>
+      <%= form_for [@room, @message], url: room_message_path(@room, @message), method: :patch, html: { data: { turbo_frame: dom_id(@message) } } do |f| %>
+        <div style="margin-bottom: 16px;">
+          <%= f.text_area :content, style: "width: 100%; min-height: 100px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; outline: none; resize: vertical;" %>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <%= link_to "キャンセル", room_path(@room), style: "padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; color: #64748b; text-decoration: none; font-size: 0.9em; text-align: center;" %>
+          <%= f.submit "保存する", style: "padding: 10px 20px; background: #764ba2; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9em;" %>
+        </div>
+      <% end %>
+    </div>
+
+  </dialog>
+<% end %>
