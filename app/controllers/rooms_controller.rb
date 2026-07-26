@@ -22,9 +22,9 @@ class RoomsController < ApplicationController
 
   def create
     invited_user_ids = Array(params[:user_ids]).map(&:to_i).reject{|id| id == current_user.id}
-
+    custom_room_name = params[:room_name].presence
     # 💡 1対1（招待された相手が1人）の場合、すでにその人との部屋があるかチェック
-    if invited_user_ids.length == 1
+    if invited_user_ids.length == 1 && custom_room_name.present?
       puts "Creation has been called"
       partner_id = invited_user_ids.first
       
@@ -32,17 +32,24 @@ class RoomsController < ApplicationController
       my_room_ids = current_user.entries.pluck(:room_id)
       
       # 相手も参加しているEntry（＝2人が共通して入っている既存の部屋）を探す
-      common_entry = Entry.find_by(user_id: partner_id, room_id: my_room_ids)
+      common_entry = Entry.join
+                          .find_by(
+                                  user_id: partner_id, 
+                                  room_id: my_room_ids,
+                                  rooms: {name: custom_room_name}
+                                  )
       
       if common_entry
-        # すでに部屋が存在するなら、新しく作らずにそこへ直接ジャンプ！
         redirect_to room_path(common_entry.room_id) and return
       end
     end
 
-    # ─── 既存の部屋がない、または複数人のグループの場合は新しく作成 ───
-    names = invited_user_ids.map {|id| User.find(id).display_name}
-    room_name = names.join(", ")
+    if custom_room_name.present?
+      room_name = custom_room_name
+    else
+      names = invited_user_ids.map {|id| User.find(id).display_name}
+      room_name = names.join(", ")
+    end
 
     ActiveRecord::Base.transaction do 
       @room = Room.create!(name: room_name)
